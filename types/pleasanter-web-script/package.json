@@ -1,10 +1,13 @@
 {
     "private": true,
     "name": "@types/pleasanter-web-script",
-    "version": "0.1.9999",
+    "version": "1.5.9999",
     "projects": [
         "https://github.com/Implem/Implem.Pleasanter"
     ],
+    "dependencies": {
+        "@types/jquery": "^3"
+    },
     "devDependencies": {
         "@types/pleasanter-web-script": "workspace:."
     },

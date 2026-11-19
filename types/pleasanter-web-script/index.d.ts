@@ -1,696 +1,449 @@
-// #region イベント関係
+/// <reference types="jquery" />
 
-/**
- * @abstract イベントが保持するデータ
- */
-interface EventData {
-    ControlId: string;
-}
-
-/***
- * @abstract イベントハンドラの引数
- */
-interface EventArguments {
-    $control: string;
-    async: boolean;
-    data: EventData;
-    json: string;
-    methodType: string;
-    ret: string;
-    url: string;
-}
-
-/***
- * @abstract イベントハンドラの定義
- */
-interface PleasanterApiEventInterface {
-    /**
-     * @abstract サーバへデータを送信した後に実行するメソッドの指定方法を説明します。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-after-send
-     */
-    after_send: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract サーバへデータを送信後、画面内容を更新後に実行するメソッドの指定方法を説明します。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-after-set
-     */
-    after_set: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract バリデーションチェックを行った後に実行するメソッドの指定方法を説明します。項目に入力した値が正しいかをチェックするときに使用してください。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-after-validate
-     */
-    after_validate: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract サーバへデータを送信する前に実行するメソッドの指定方法を説明します。項目に入力した値が正しいかをチェックするときに使用してください。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-before-set
-     */
-    before_send: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract サーバへデータを送信後、画面内容を更新する前に実行するメソッドの指定方法を説明します。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-before-set
-     */
-    before_set: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract バリデーションチェックを行う前に実行するメソッドの指定方法を説明します。項目に入力した値が正しいかをチェックするときに使用してください。
-     * @param arg フック情報
-     * @returns 処理を続行するか
-     * @see https://pleasanter.org/manual/script-events-before-validate
-     */
-    before_validate: (arg: EventArguments) => boolean;
-
-    /**
-     * @abstract 「バーンダウンチャート」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-burndown-load
-     */
-    on_burndown_load: () => void;
-
-    /**
-     * @abstract 「カレンダー」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-calendar-load
-     */
-    on_calendar_load: () => void;
-
-    /**
-     * @abstract 「クロス集計」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-crosstab-load
-     */
-    on_crosstab_load: () => void;
-
-    /**
-     * @abstract  「編集画面」を読み込んだときに実行するメソッドの指定方法を説明します。当メソッドは主に「レコードの遷移にAjaxを使用」や「ダイアログで編集」にチェックを入れた場合にスクリプトを実行させたい場合に使用してください。
-     *  @see https://pleasanter.org/manual/script-events-on-editor-load
-     */
-    on_editor_load: () => void;
-
-    /**
-     * @abstract 「ガントチャート」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-gantt-load
-     */
-    on_gantt_load: () => void;
-
-    /**
-     * @abstract 「一覧画面」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-grid-load
-     */
-    on_grid_load: () => void;
-
-    /**
-     *  @abstract 「カンバン」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-kamban-load
-     */
-    on_kamban_load: () => void;
-
-    /**
-     * @abstract 「時系列チャート」を読み込んだとき、もしくはフィルタ等で表示する内容が変わったときに実行するメソッドの指定方法を説明します。
-     * @see https://pleasanter.org/manual/script-events-on-timeseries-load
-     */
-    on_timeseries_load: () => void;
-}
-
-// #endregion
-
-/**
- * @abstract プリザンターのAPI定義
- */
+/** Pleasanter 1.5の画面スクリプト。通常のPleasanter画面上で使用する。 */
 interface PleasanterApiInterface {
     /**
-     * Pleasanterで実行されるアクションの種類を表します。
-     * @returns {'new' | 'edit' | 'index' | 'calendar' | 'crosstab' | 'gantt' | 'burndown' | 'timeseries' | 'kanban' | 'imagelib' | 'trashbox'} アクションの種類。
-     * @see [Pleasanter ドキュメント](https://pleasanter.org/manual/script-action)
+     * 現在のルート値。例: calendar、analy、kamban。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/get-site-info/script-action/
      */
-    action():
-        | "new"
-        | "edit"
-        | "index"
-        | "calendar"
-        | "crosstab"
-        | "gantt"
-        | "burndown"
-        | "timeseries"
-        | "kanban"
-        | "imagelib"
-        | "trashbox";
-
-    /// #region Itemデータ系
+    action(): string;
 
     /**
-     * AjaxのPOSTリクエストによる値のレコード取得が可能なメソッドです。
-     * @param ref レコード取得のためのリクエスト参照
-     * @see https://pleasanter.org/manual/script-api-get
+     * 現在のReferenceTypeを返す。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/get-site-info/script-table-name/
      */
-    apiGet(ref: GetRequest): void;
+    tableName(): string;
 
     /**
-     * AjaxのPOSTリクエストによる新規レコードの作成が可能なメソッドです。
-     * @param createRequest 新規レコード作成のためのリクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-create
+     * 現在のルートのcontroller値を返す。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/get-site-info/script-controller/
      */
-    apiCreate(createRequest: CreateRequestArgument): void;
+    controller(): string;
 
     /**
-     * AjaxのPOSTリクエストによるレコード削除が可能なメソッドです。
-     * @param deleteRequest レコード削除のためのリクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-delete
+     * $p.deptId
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-dept-id/
      */
-    apiDelete(deleteRequest: DeleteRequestArgument): void;
-
-    // apiDeleteSiteのJSDocコメントは後で追加する
-    // https://pleasanter.org/manual/script-api-delete-site
+    deptId(): number;
 
     /**
-     * AjaxのPOSTリクエストによるレコードの更新が可能なメソッドです。
-     * @param updateRequest レコード更新のためのリクエストパラメータ
-     * @see https://pleasanter.net/fs/publishes/524076/edit
-     */
-    apiUpdate(updateRequest: UpdateRequest): void;
-
-    // #endregion
-
-    /// #region ユーザー関係
-
-    /**
-     * AjaxのPOSTリクエストによるユーザ取得が可能なメソッドです。
-     * @param usersGetRequest ユーザ取得のためのリクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-users-get
-     */
-    apiUsersGet(usersGetRequest: UsersGetRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるユーザの更新が可能なメソッドです。
-     * @param usersUpdateRequest ユーザ更新のためのリクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-users-update
-     */
-    apiUsersUpdate(usersUpdateRequest: UsersUpdateRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるユーザの削除が可能なメソッドに関する説明をします。ユーザ情報を削除したいときに使用してください。
-     *
-     * @param usersDeleteRequest ユーザ削除のためのリクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-users-delete
-     */
-    apiUsersDelete(usersDeleteRequest: UsersDeleteRequest): void;
-
-    // #endregion
-
-    /// #region Site関係
-
-    /**
-     * AjaxのPOSTリクエストによるサイト情報の取得が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-get-site
-     */
-    apiGetSite(ref: GetSiteRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるサイトの削除が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-delete-site
-     */
-    apiDeleteSite(ref: DeleteSiteRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるサイト情報の更新が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-delete-site
-     */
-    apiUpdateSite(ref: UpdateSiteRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるサイトの作成が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-create-site
-     */
-    apiCreateSite(ref: UpdateSiteRequest): void;
-
-    // #endregion
-
-    /// #region Groups関係
-
-    /**
-     * AjaxのPOSTリクエストによるグループ情報の取得が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-groups-get
-     */
-    apiGroupsGet(ref: GetGroupsRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるグループの削除が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-groups-delete
-     */
-    apiGroupsDelete(ref: DeleteGroupsRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるグループの更新が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-groups-update
-     */
-    apiGroupsUpdate(ref: UpdateGroupsRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるグループの作成が行えるスクリプト機能です。
-     * @param ref リクエストパラメータ
-     * @see https://pleasanter.org/manual/script-api-groups-create
-     */
-    apiGroupsCreate(ref: CreateGroupsArgument): void;
-
-    // #endregion
-
-    /**
-     * 指定された宛先にメールを送信するためのメソッドです。
-     * @param {number} id - 操作対象のサイトID
-     * @param {SendMailRequest} data - メールの内容。To, Cc, Bcc, Title, Bodyを含むオブジェクト。
-     * @see [Pleasanter ドキュメント](https://pleasanter.org/manual/script-api-send-mail)
-     */
-    apiSendMail(id: number, sendMailRequest: SendMailRequest): void;
-
-    /**
-     * AjaxのPOSTリクエストによるAPIのリスクエストを実行する際のURL値の取得が可能なメソッドに関する説明をします。
-     * @param {number} id - URLを取得したいサイトID
-     * @param {string} action - 指定できるアクション種別 : get、create、update、delete
-     * @see [Pleasanter ドキュメント](https://pleasanter.org/manual/script-api-url)
-     */
-    apiUrl(id: number, action: "get" | "create" | "update" | "delete"): string;
-
-    /**
-     * 画面下に表示されるメッセージを削除することができるメソッドです。
-     * @see https://pleasanter.org/manual/script-clear-message
-     */
-    clearMessage(): void;
-
-    /**
-     * AjaxのPOSTリクエストを使用して、現在のコントローラーの種類を取得します。
-     * 取得可能な値には'tenants', 'depts', 'groups', 'users', 'items'があります。
-     *
-     * @returns {ControllerType} 現在のコントローラーの種類。
-     * @see [Pleasanter ドキュメント](https://pleasanter.org/manual/script-controller)
-     */
-    controller: () => "tenants" | "depts" | "groups" | "users" | "items";
-
-    /**
-     * 現在ログインしているユーザーの組織IDを取得します。
-     * この関数は、組織IDをプログラムでアクセスする必要がある場合に使用できます。
-     *
-     * @returns {number} ログインユーザーの組織ID。
-     * @see [Pleasanter ドキュメント](https://pleasanter.org/manual/script-dept-id)
-     */
-    deptId: () => number;
-
-    /**
-     * 対象項目のカラム名（データベースの列名）を取得するメソッドです。
-     * @param name カラム名
-     * @returns 指定されたカラム名に対応するデータベースの列名
-     * @see https://pleasanter.org/manual/script-get-column-name
-     */
-    getColumnName(name: string): string | undefined;
-
-    /**
-     * 編集画面上で対象の項目名から要素を取得するメソッドです。対象の項目名のid名や値を出力したいときに使用してください。
-     * @param labelName ラベル名
-     * @returns 指定されたラベル名に一致するHTML要素の配列
-     * @see https://pleasanter.org/manual/script-get-control
-     */
-    getControl(labelName: string): HTMLElement[] | undefined;
-
-    /**
-     * 対象の項目名からFieldを取得するメソッドです。対象の項目をラベルごとに表示/非表示切り替えたいときなどに使用してください。
-     * @param {string} labelName - 項目の名前。
-     * @returns {HTMLElement[] | undefined} - 指定されたラベル名に対応するHTML要素の配列。
-     * @see https://pleasanter.org/manual/script-get-field
-     */
-    getField(labelName: string): HTMLElement[] | undefined;
-
-    /**
-     * 「一覧画面」のtdタグの要素を取得するメソッドです。一覧画面の特定のセルにアクセスする際に使用します。
-     * @param {number} id - レコードID。
-     * @param {string} name - 一覧レコード上の表示名。
-     * @returns {HTMLElement[] | undefined} - 指定されたIDと名前に対応するHTML要素の配列。
-     * @see https://pleasanter.org/manual/script-get-grid-cell
-     */
-    getGridCell(id: number, name: string): HTMLElement[] | undefined;
-
-    /**
-     * 「一覧画面」で、レコードの表示名のデータが何列目にあるかを取得するメソッドです。
-     * @param {string} displayName - 表示名。
-     * @returns {number | undefined} - 指定された表示名のデータが存在する列のインデックス。
-     * @see https://pleasanter.org/manual/script-get-column-index
-     */
-    getGridColumnIndex(displayName: string): number | undefined;
-
-    /**
-     * 「一覧画面」で、指定したレコードIDに対応する行を取得するメソッドです。
-     * @param {number} recordId - レコードID。
-     * @returns {HTMLElement[] | undefined} - 指定されたレコードIDに対応するHTML要素の配列。
-     * @see https://pleasanter.org/manual/script-get-grid-row
-     */
-    getGridRow(recordId: number): HTMLElement[] | undefined;
-
-    /**
-     * 現在のレコードのIDを取得するメソッドです。
-     * @returns {number} - 現在のレコードのID。
-     * @see https://pleasanter.org/manual/script-id
+     * $p.id
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-id/
      */
     id(): number;
 
     /**
-     * ユーザがログインしている場合、そのユーザのIDを取得するメソッドです。
-     * @returns {number} - ログインしているユーザのID。
-     * @see https://pleasanter.org/manual/script-login-id
+     * タイトル指定で未検出の場合はundefined。無引数では現在のサイトID。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-site-id/
      */
-    loginId(): number;
+    siteId(): number;
+    siteId(siteTitle: string): number | undefined;
 
     /**
-     * 指定したイベントが発生した際に実行する任意の処理を設定するメソッドです。
-     * @param {string} eventName - イベント名。
-     * @param {string} monitorItem - 監視項目。
-     * @param {() => void} func - 実行する処理。
-     * @see https://pleasanter.org/manual/script-on
+     * 標準のPleasanter画面でログインID文字列を取得。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-login-id/
      */
-    on(eventName: string, monitorItem: string, func: () => void): void;
+    loginId(): string;
 
     /**
-     * レスポンシブスタイルが有効化されているかどうかを判断するメソッドです。このメソッドは、レスポンシブスタイルの状態に基づいてスクリプトの実行を制御する際に使用されます。
-     * @returns {boolean} レスポンシブスタイルが有効化されているかの真偽値を返します。
-     * @see https://pleasanter.org/manual/script-responsive
-     */
-    responsive(): boolean;
-
-    /**
-     * 「一覧画面」でチェックを入れた対象「レコード」のIDの配列を取得するメソッドです。
-     * @returns {number[]} 選択されたレコードのIDの配列を返します。
-     * @see https://pleasanter.org/manual/script-selected-ids
-     */
-    selectedIds(): number[];
-
-    /**
-     * 画面上の値の変更と$p.dataへの格納を同時に行うメソッドです。
-     * @param {string} controlId - 制御対象の要素のID。
-     * @param {string} val - 設定する値。
-     * @see https://pleasanter.org/manual/script-set
-     */
-    set(controlId: string, val: string): void;
-
-    /**
-     * 画面下にメッセージを表示するメソッドです。
-     * @param {string} id - メッセージを表示する要素のID。
-     * @param {SetMessageArgumentType} alertType - 表示するアラートの設定。
-     * @see https://pleasanter.org/manual/script-set-message
-     * @example　$p.setMessage('#Message', JSON.stringify({
-     *     Css: 'alert-success',
-     *     Text: '処理が正常に終了しました。'
-     *     }));
-     */
-    setMessage(id: string, alertType: string): void;
-
-    /**
-     * 指定されたサイト名に対応するサイトのIDを取得するメソッドです。
-     * @param {string} sitename - サイト名。
-     * @returns {number} 指定されたサイト名に対応するIDを返します。
-     * @see https://pleasanter.org/manual/script-site-id
-     */
-    siteId(sitename: string): number;
-
-    /**
-     * AjaxのPOSTリクエストによるスクリプトを配置したフォルダまたはテーブルの種類を取得するメソッドです。
-     * @returns {'Sites' | 'Results' | 'Issues' | 'Wikis'} スクリプトが配置されているフォルダまたはテーブルの種類を返します。
-     * @see https://pleasanter.org/manual/script-table-name
-     */
-    tableName(): "Sites" | "Results" | "Issues" | "Wikis";
-
-    /**
-     * ログインしているユーザのユーザIDを取得するメソッドです。
-     * @returns {number} ログインしているユーザのIDを返します。
-     * @see https://pleasanter.org/manual/script-user-id
+     * $p.userId
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-user-id/
      */
     userId(): number;
 
     /**
-     * ログインしているユーザの名前を取得するメソッドです。
-     * @returns {string} ログインしているユーザの名前を返します。
-     * @see https://pleasanter.org/manual/script-user-name
+     * $p.userName
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-user-name/
      */
     userName(): string;
 
     /**
-     * @abstract イベントに関連するAPIのインターフェースです。
+     * $p.groupIds
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-groupIds/
      */
+    groupIds(): number[];
+
+    /**
+     * $p.getColumnName
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-column-name/
+     */
+    getColumnName(name: string): string | undefined;
+
+    /**
+     * 列がなければundefined。要素がなければ空のjQuery集合。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-control/
+     */
+    getControl(name: string): JQuery | undefined;
+
+    /**
+     * 列がなければundefined。要素がなければ空のjQuery集合。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-field/
+     */
+    getField(name: string): JQuery | undefined;
+
+    /**
+     * $p.getGridRow
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-grid-row/
+     */
+    getGridRow(recordId: number): JQuery<HTMLTableRowElement>;
+
+    /**
+     * $p.getGridCell
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-grid-cell/
+     */
+    getGridCell(recordId: number, name: string, excludeHistory?: boolean): JQuery<HTMLTableCellElement>;
+
+    /**
+     * 未検出は-1。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-get-column-index/
+     */
+    getGridColumnIndex(name: string): number;
+
+    /**
+     * $p.getValue
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-get-value/
+     */
+    getValue(name: string): string | string[] | boolean | null | undefined;
+
+    /**
+     * $p.on
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/value-operations/script-on/
+     */
+    on(
+        events: string,
+        name: string,
+        func: (
+            this: HTMLElement,
+            event: JQuery.TriggeredEvent<Document, undefined, HTMLElement, HTMLElement>,
+        ) => unknown,
+    ): void;
+
+    /**
+     * 複数選択ではJSON配列文字列を渡す。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/update-site-info/script-set/
+     */
+    set(control: JQuery, value: string | number | boolean): void;
+
+    /**
+     * $p.clearMessage
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/site-message/script-clear-message/
+     */
+    clearMessage(): void;
+
+    /**
+     * valueはCss/Textを持つメッセージのJSON文字列。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/site-message/script-set-message/
+     */
+    setMessage(target: string, value: string): void;
+
+    /**
+     * $p.responsive
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-responsive/
+     */
+    responsive(): boolean;
+
+    /**
+     * 正常時はID配列、検証失敗時は画面指示配列、通信失敗時は-1。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-selected-ids/
+     */
+    selectedIds(): number[] | ResponseInstruction[] | -1;
+
+    /**
+     * プロセスを実行。sendの戻り値は返さない。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-execprocess/
+     */
+    execProcess(control: JQuery): void;
+
+    /**
+     * 中止時false、未送信時undefined、送信処理の結果は数値。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/uncategorized/script-send/
+     */
+    send(control: JQuery, formId?: string, async?: boolean, clearMessage?: boolean): number | false | undefined;
+
+    /**
+     * $p.apiUrl
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-url/
+     */
+    apiUrl(id: number, action: string, controller?: string): string;
+
+    /**
+     * $p.apiGet
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-get/
+     */
+    apiGet(request: KeyValuesGetRequest): JQuery.jqXHR<KeyValuesResponseData>;
+    apiGet(request: StandardGetRequest): JQuery.jqXHR<GetResponseData>;
+    apiGet(request: GetRequest): JQuery.jqXHR<GetResponseData | KeyValuesResponseData>;
+
+    /**
+     * $p.apiCreate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-create/
+     */
+    apiCreate(request: CreateRequestArgument): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiUpdate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-update/
+     */
+    apiUpdate(request: UpdateRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * Keysは空にできない。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-upsert/
+     */
+    apiUpsert(request: UpsertRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiDelete
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-delete/
+     */
+    apiDelete(request: DeleteRequestArgument): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiBulkDelete
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-bulk-delete/
+     */
+    apiBulkDelete(request: BulkDeleteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiGetSite
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-get-site/
+     */
+    apiGetSite(request: GetSiteRequest): JQuery.jqXHR<SiteResponseData>;
+
+    /**
+     * $p.apiCreateSite
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-create-site/
+     */
+    apiCreateSite(request: UpdateSiteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiUpdateSite
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-update-site/
+     */
+    apiUpdateSite(request: UpdateSiteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiDeleteSite
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-delete-site/
+     */
+    apiDeleteSite(request: DeleteSiteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiMoveSite
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-move-site/
+     */
+    apiMoveSite(request: MoveSiteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiGetClosestSiteId
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-get-closest-siteid/
+     */
+    apiGetClosestSiteId(request: ClosestSiteRequest): JQuery.jqXHR<ClosestSiteResponse>;
+
+    /**
+     * id/dataの1オブジェクト。To/Cc/Bccの少なくとも1つが必要。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-send-mail/
+     */
+    apiSendMail(request: SendMailRequestArgument): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiUsersGet
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-users-get/
+     */
+    apiUsersGet(request: UsersGetRequest): JQuery.jqXHR<GetResponseUserData>;
+
+    /**
+     * $p.apiUsersCreate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-users-create/
+     */
+    apiUsersCreate(request: UsersCreateRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiUsersUpdate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-users-update/
+     */
+    apiUsersUpdate(request: UsersUpdateRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiUsersDelete
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-users-delete/
+     */
+    apiUsersDelete(request: UsersDeleteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiDeptsGet
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-depts-get/
+     */
+    apiDeptsGet(request: DeptsGetRequest): JQuery.jqXHR<GetResponseDeptData>;
+
+    /**
+     * 要求データはdataに指定する。
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-depts-create/
+     */
+    apiDeptsCreate(request: DeptsCreateRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiDeptsUpdate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-depts-update/
+     */
+    apiDeptsUpdate(request: DeptsUpdateRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiDeptsDelete
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-depts-delete/
+     */
+    apiDeptsDelete(request: DeptsDeleteRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiGroupsGet
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-groups-get/
+     */
+    apiGroupsGet(request: GetGroupsRequest): JQuery.jqXHR<GroupsResponse>;
+
+    /**
+     * $p.apiGroupsCreate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-groups-create/
+     */
+    apiGroupsCreate(request: CreateGroupsArgument): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiGroupsUpdate
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-groups-update/
+     */
+    apiGroupsUpdate(request: UpdateGroupsRequest): JQuery.jqXHR<OperationResponseJSON>;
+
+    /**
+     * $p.apiGroupsDelete
+     * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-groups-delete/
+     */
+    apiGroupsDelete(request: DeleteGroupsRequest): JQuery.jqXHR<OperationResponseJSON>;
+
     events: PleasanterApiEventInterface;
 }
 
-// ---
-
-// #region SetMessage関係
-
-/**
- * イベントに関連するAPIのインターフェースです。
- * @abstract SetMessageArgument 関数の引数型
- * @argument {Css} メッセージ表示のためのアラートタイプを定義する列挙型です。
- */
+/** サーバーから返される画面更新指示。ValueはMethodによって異なる。 */
+interface ResponseInstruction {
+    Method: string;
+    Target?: string | undefined;
+    Value?: unknown;
+    Options?: string | undefined;
+}
+interface EventData {
+    ControlId?: string | undefined;
+    [name: string]: unknown;
+}
+interface EventArguments {
+    $control: JQuery | undefined;
+    async: boolean | null | undefined;
+    data: EventData | null | undefined;
+    json: ResponseInstruction[] | null | undefined;
+    methodType: string | null | undefined;
+    ret: number | undefined;
+    url: string | null | undefined;
+}
+type PleasanterCancelableEvent = "before_validate" | "after_validate" | "before_send";
+type PleasanterNotificationEvent = "after_send" | "before_set" | "after_set";
+type PleasanterCancelableHandler = ((arg: EventArguments) => boolean) | ((arg: EventArguments) => void);
+interface PleasanterApiEventInterface {
+    [name: `${PleasanterCancelableEvent}_${string}`]: PleasanterCancelableHandler | undefined;
+    [name: `${PleasanterNotificationEvent}_${string}`]: ((arg: EventArguments) => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-editor-load/ */
+    on_editor_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-grid-load/ */
+    on_grid_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-calendar-load/ */
+    on_calendar_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-crosstab-load/ */
+    on_crosstab_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-gantt-load/ */
+    on_gantt_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-burndown-load/ */
+    on_burndown_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-timeseries-load/ */
+    on_timeseries_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-analy-load/ */
+    on_analy_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-on-kamban-load/ */
+    on_kamban_load?: (() => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-before-validate/ */
+    before_validate?: PleasanterCancelableHandler | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-after-validate/ */
+    after_validate?: PleasanterCancelableHandler | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-before-send/ */
+    before_send?: PleasanterCancelableHandler | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-after-send/ */
+    after_send?: ((arg: EventArguments) => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-before-set/ */
+    before_set?: ((arg: EventArguments) => void) | undefined;
+    /** @see https://pleasanter.org/ja/manual/developers-guide/script/events/script-events-after-set/ */
+    after_set?: ((arg: EventArguments) => void) | undefined;
+}
 interface SetMessageArgumentType {
-    Css: /** 正常を表す、緑色のメッセージ欄 */
-        | "alert-success"
-        /** 注意を表す、黄色のメッセージ欄 */
-        | "alert-warning"
-        /** 異常を表す、赤色のメッセージ欄 */
-        | "alert-error";
+    Css: "alert-success" | "alert-warning" | "alert-error";
     Text: string;
 }
+type PleasanterLetter =
+    | "A"
+    | "B"
+    | "C"
+    | "D"
+    | "E"
+    | "F"
+    | "G"
+    | "H"
+    | "I"
+    | "J"
+    | "K"
+    | "L"
+    | "M"
+    | "N"
+    | "O"
+    | "P"
+    | "Q"
+    | "R"
+    | "S"
+    | "T"
+    | "U"
+    | "V"
+    | "W"
+    | "X"
+    | "Y"
+    | "Z";
+type PleasanterDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+type PleasanterColumnSuffix = PleasanterLetter | Exclude<`0${PleasanterDigit}${PleasanterDigit}`, "000"> | "100";
+type ClassHash = Partial<Record<`Class${PleasanterColumnSuffix}`, string>>;
+type NumHash = Partial<Record<`Num${PleasanterColumnSuffix}`, number | null>>;
+type DateHash = Partial<Record<`Date${PleasanterColumnSuffix}`, string>>;
+type DescriptionHash = Partial<Record<`Description${PleasanterColumnSuffix}`, string>>;
+type CheckHash = Partial<Record<`Check${PleasanterColumnSuffix}`, boolean>>;
+type AttachmentsHash = Partial<Record<`Attachments${PleasanterColumnSuffix}`, AttachmentsData[]>>;
 
-// #endregion
-
-// #region Hashの定義関係
-
-// Hash の元となる方定義
-
-interface ClassHash {
-    ClassA?: string | undefined;
-    ClassB?: string | undefined;
-    ClassC?: string | undefined;
-    ClassD?: string | undefined;
-    ClassE?: string | undefined;
-    ClassF?: string | undefined;
-    ClassG?: string | undefined;
-    ClassH?: string | undefined;
-    ClassI?: string | undefined;
-    ClassJ?: string | undefined;
-    ClassK?: string | undefined;
-    ClassL?: string | undefined;
-    ClassM?: string | undefined;
-    ClassN?: string | undefined;
-    ClassO?: string | undefined;
-    ClassP?: string | undefined;
-    ClassQ?: string | undefined;
-    ClassR?: string | undefined;
-    ClassS?: string | undefined;
-    ClassT?: string | undefined;
-    ClassU?: string | undefined;
-    ClassV?: string | undefined;
-    ClassW?: string | undefined;
-    ClassX?: string | undefined;
-    ClassY?: string | undefined;
-    ClassZ?: string | undefined;
-}
-
-interface NumHash {
-    NumA?: number | undefined;
-    NumB?: number | undefined;
-    NumC?: number | undefined;
-    NumD?: number | undefined;
-    NumE?: number | undefined;
-    NumF?: number | undefined;
-    NumG?: number | undefined;
-    NumH?: number | undefined;
-    NumI?: number | undefined;
-    NumJ?: number | undefined;
-    NumK?: number | undefined;
-    NumL?: number | undefined;
-    NumM?: number | undefined;
-    NumN?: number | undefined;
-    NumO?: number | undefined;
-    NumP?: number | undefined;
-    NumQ?: number | undefined;
-    NumR?: number | undefined;
-    NumS?: number | undefined;
-    NumT?: number | undefined;
-    NumU?: number | undefined;
-    NumV?: number | undefined;
-    NumW?: number | undefined;
-    NumX?: number | undefined;
-    NumY?: number | undefined;
-    NumZ?: number | undefined;
-}
-
-interface DateHash {
-    DateA?: string | undefined;
-    DateB?: string | undefined;
-    DateC?: string | undefined;
-    DateD?: string | undefined;
-    DateE?: string | undefined;
-    DateF?: string | undefined;
-    DateG?: string | undefined;
-    DateH?: string | undefined;
-    DateI?: string | undefined;
-    DateJ?: string | undefined;
-    DateK?: string | undefined;
-    DateL?: string | undefined;
-    DateM?: string | undefined;
-    DateN?: string | undefined;
-    DateO?: string | undefined;
-    DateP?: string | undefined;
-    DateQ?: string | undefined;
-    DateR?: string | undefined;
-    DateS?: string | undefined;
-    DateT?: string | undefined;
-    DateU?: string | undefined;
-    DateV?: string | undefined;
-    DateW?: string | undefined;
-    DateX?: string | undefined;
-    DateY?: string | undefined;
-    DateZ?: string | undefined;
-}
-
-interface DescriptionHash {
-    DescriptionA?: string | undefined;
-    DescriptionB?: string | undefined;
-    DescriptionC?: string | undefined;
-    DescriptionD?: string | undefined;
-    DescriptionE?: string | undefined;
-    DescriptionF?: string | undefined;
-    DescriptionG?: string | undefined;
-    DescriptionH?: string | undefined;
-    DescriptionI?: string | undefined;
-    DescriptionJ?: string | undefined;
-    DescriptionK?: string | undefined;
-    DescriptionL?: string | undefined;
-    DescriptionM?: string | undefined;
-    DescriptionN?: string | undefined;
-    DescriptionO?: string | undefined;
-    DescriptionP?: string | undefined;
-    DescriptionQ?: string | undefined;
-    DescriptionR?: string | undefined;
-    DescriptionS?: string | undefined;
-    DescriptionT?: string | undefined;
-    DescriptionU?: string | undefined;
-    DescriptionV?: string | undefined;
-    DescriptionW?: string | undefined;
-    DescriptionX?: string | undefined;
-    DescriptionY?: string | undefined;
-    DescriptionZ?: string | undefined;
-}
-
-interface CheckHash {
-    CheckA?: boolean | undefined;
-    CheckB?: boolean | undefined;
-    CheckC?: boolean | undefined;
-    CheckD?: boolean | undefined;
-    CheckE?: boolean | undefined;
-    CheckF?: boolean | undefined;
-    CheckG?: boolean | undefined;
-    CheckH?: boolean | undefined;
-    CheckI?: boolean | undefined;
-    CheckJ?: boolean | undefined;
-    CheckK?: boolean | undefined;
-    CheckL?: boolean | undefined;
-    CheckM?: boolean | undefined;
-    CheckN?: boolean | undefined;
-    CheckO?: boolean | undefined;
-    CheckP?: boolean | undefined;
-    CheckQ?: boolean | undefined;
-    CheckR?: boolean | undefined;
-    CheckS?: boolean | undefined;
-    CheckT?: boolean | undefined;
-    CheckU?: boolean | undefined;
-    CheckV?: boolean | undefined;
-    CheckW?: boolean | undefined;
-    CheckX?: boolean | undefined;
-    CheckY?: boolean | undefined;
-    CheckZ?: boolean | undefined;
-}
-
-interface AttachmentsHash {
-    AttachmentsA?: AttachmentsData[] | undefined;
-    AttachmentsB?: AttachmentsData[] | undefined;
-    AttachmentsC?: AttachmentsData[] | undefined;
-    AttachmentsD?: AttachmentsData[] | undefined;
-    AttachmentsE?: AttachmentsData[] | undefined;
-    AttachmentsF?: AttachmentsData[] | undefined;
-    AttachmentsG?: AttachmentsData[] | undefined;
-    AttachmentsH?: AttachmentsData[] | undefined;
-    AttachmentsI?: AttachmentsData[] | undefined;
-    AttachmentsJ?: AttachmentsData[] | undefined;
-    AttachmentsK?: AttachmentsData[] | undefined;
-    AttachmentsL?: AttachmentsData[] | undefined;
-    AttachmentsM?: AttachmentsData[] | undefined;
-    AttachmentsN?: AttachmentsData[] | undefined;
-    AttachmentsO?: AttachmentsData[] | undefined;
-    AttachmentsP?: AttachmentsData[] | undefined;
-    AttachmentsQ?: AttachmentsData[] | undefined;
-    AttachmentsR?: AttachmentsData[] | undefined;
-    AttachmentsS?: AttachmentsData[] | undefined;
-    AttachmentsT?: AttachmentsData[] | undefined;
-    AttachmentsU?: AttachmentsData[] | undefined;
-    AttachmentsV?: AttachmentsData[] | undefined;
-    AttachmentsW?: AttachmentsData[] | undefined;
-    AttachmentsX?: AttachmentsData[] | undefined;
-    AttachmentsY?: AttachmentsData[] | undefined;
-    AttachmentsZ?: AttachmentsData[] | undefined;
-}
 interface AttachmentsData {
-    Guid: string | undefined;
-    Name: string | undefined;
-    Size: number | undefined;
-    HashCode: string | undefined;
+    Guid?: string | undefined;
+    Name?: string | undefined;
+    ReferenceId?: number | undefined;
+    Size?: number | undefined;
+    Extension?: string | undefined;
+    ContentType?: string | undefined;
+    Added?: boolean | undefined;
+    Deleted?: boolean | undefined;
+    Base64?: string | undefined;
+    Action?: string | undefined;
+    FileName?: string | undefined;
+    Base64Binary?: string | undefined;
+    HashCode?: string | undefined;
+    Overwritten?: boolean | undefined;
 }
-
-// #endregion
-
-/**
- * @abstract  SendMailの引数データ型
- */
-interface SendMailRequest {
-    To: string;
-    Cc?: string | undefined;
-    Bcc?: string | undefined;
-    Title: string;
-    Body: string;
+interface AttachmentUpload extends AttachmentsData {
+    Name: string;
+    ContentType: string;
+    Base64: string;
 }
-
-interface RecordDataItems {
-    SiteId?: number | undefined;
-    IssueId?: number | undefined;
-    ResultId?: number | undefined;
-    Body?: string | undefined;
-    StartTime?: string | undefined;
-    CompletionTime?: string | undefined;
-    WorkValue?: string | undefined;
-    ProgressRate?: number | undefined;
-    RemainingWorkValue?: number | undefined;
-    UpdateTime?: string | undefined;
-    Ver?: number | undefined;
-    Title?: string | undefined;
-    Status?: string | undefined;
-    Manager?: number | undefined;
-    Owner?: number | undefined;
-    Comments?: string | undefined;
-    Creator?: number | undefined;
-    Updator?: number | undefined;
-    CreatedTime?: string | undefined;
-    ItemTitle?: string | undefined;
-
+interface AttachmentDelete extends AttachmentsData {
+    Guid: string;
+    Deleted: true;
+}
+interface PleasanterHashes {
     ClassHash?: ClassHash | undefined;
     NumHash?: NumHash | undefined;
     DateHash?: DateHash | undefined;
@@ -698,121 +451,154 @@ interface RecordDataItems {
     CheckHash?: CheckHash | undefined;
     AttachmentsHash?: AttachmentsHash | undefined;
 }
-
-// #region APIの呼び出しに失敗した時のデータ型
-
+interface PleasanterApiData {
+    ApiVersion?: number | undefined;
+    ApiKey?: string | undefined;
+    Token?: string | undefined;
+    SsCache?: boolean | undefined;
+    Offset?: number | undefined;
+    PageSize?: number | undefined;
+}
+type PleasanterLegacyColumns =
+    & ClassHash
+    & NumHash
+    & DateHash
+    & DescriptionHash
+    & CheckHash
+    & Partial<Record<`Attachments${PleasanterColumnSuffix}`, string>>;
+interface RecordDataItems extends PleasanterHashes, PleasanterLegacyColumns {
+    SiteId?: number | undefined;
+    IssueId?: number | undefined;
+    ResultId?: number | undefined;
+    UpdatedTime?: string | undefined;
+    Ver?: number | undefined;
+    Title?: string | undefined;
+    Body?: string | undefined;
+    StartTime?: string | undefined;
+    CompletionTime?: string | undefined;
+    WorkValue?: number | undefined;
+    ProgressRate?: number | undefined;
+    RemainingWorkValue?: number | undefined;
+    Status?: number | undefined;
+    Manager?: number | undefined;
+    Owner?: number | undefined;
+    Locked?: boolean | undefined;
+    Comments?: string | undefined;
+    Creator?: number | undefined;
+    Updator?: number | undefined;
+    CreatedTime?: string | undefined;
+    ItemTitle?: string | undefined;
+}
+interface PleasanterImageData {
+    HeadNewLine?: boolean | undefined;
+    EndNewLine?: boolean | undefined;
+    Position?: number | undefined;
+    Alt?: string | undefined;
+    Extension?: string | undefined;
+    Base64?: string | undefined;
+}
+interface RecordWriteData extends RecordDataItems, PleasanterApiData {
+    VerUp?: boolean | undefined;
+    ProcessId?: number | undefined;
+    ProcessIds?: number[] | undefined;
+    ImageHash?: Record<string, PleasanterImageData> | undefined;
+    RecordPermissions?: string[] | undefined;
+}
 interface OperationResponseJSON {
     Id: number;
     Message: string;
     StatusCode: number;
+    LimitPerDate?: number | undefined;
+    LimitRemaining?: number | undefined;
 }
-
-// memo:
-// 調べた結果、ここだけスネークケースとなっている。
-interface FailDataType {
-    status: number;
-    statusText: string;
-
-    responseJSON: OperationResponseJSON;
+/** 通信障害ではresponseJSONが存在しない場合がある。 */
+type FailDataType = JQuery.jqXHR<unknown>;
+interface PleasanterCallbacks<T> {
+    done?: ((data: T, textStatus: JQuery.Ajax.SuccessTextStatus, xhr: JQuery.jqXHR<T>) => void) | undefined;
+    fail?: ((xhr: FailDataType, textStatus: JQuery.Ajax.ErrorTextStatus, errorThrown: string) => void) | undefined;
+    always?:
+        | ((
+            ...args:
+                | [data: T, textStatus: JQuery.Ajax.SuccessTextStatus, xhr: JQuery.jqXHR<T>]
+                | [xhr: FailDataType, textStatus: JQuery.Ajax.ErrorTextStatus, errorThrown: string]
+        ) => void)
+        | undefined;
+    async?: boolean | undefined;
 }
-
-// #endregion
-
-/**
- * @abstract リクエスト要求時のインターフェース
- */
-interface AbstractRequestInterface<ResponseHandlerArgumentsType> {
+interface AbstractRequestInterface<T> extends PleasanterCallbacks<T> {
     id: number;
-    done: (data: ResponseHandlerArgumentsType) => void;
-    fail?: (data: FailDataType) => void;
-    always?: (data: FailDataType) => void;
 }
-
-/**
- * @abstract リクエスト処理において、引数にデータをとる場合
- */
-interface AbstractRequestInterfaceWithData<
-    ResponseHandlerArgumentsType,
-    DataType = void,
-> extends AbstractRequestInterface<ResponseHandlerArgumentsType> {
-    data?: DataType | undefined;
+interface AbstractRequestInterfaceWithData<T, D = void> extends AbstractRequestInterface<T> {
+    data?: D | undefined;
 }
-
-// #region GetRequest関係の定義
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface GetRequest extends AbstractRequestInterfaceWithData<GetResponseData, DataOfGetRequest> {}
-
-interface GetResponseData {
+type PleasanterWriteRequest<T, D> = AbstractRequestInterface<T> & { data: D };
+type PleasanterListRequest<T> = PleasanterCallbacks<T> & {
+    id?: number | undefined;
+    data?: DataOfGetRequest | undefined;
+};
+type PleasanterCreateRequest<D> = PleasanterCallbacks<OperationResponseJSON> & { data: D };
+interface PleasanterPageData<T> {
+    Offset: number;
+    PageSize: number;
+    TotalCount: number;
+    Data: T[];
+}
+interface PleasanterPage<T> {
     StatusCode: number;
-    Response: {
-        Offset: number;
-        PageSize: number;
-        TotalCount: number;
-        Data: RecordDataItems[];
-    };
+    LimitPerDate?: number | undefined;
+    LimitRemaining?: number | undefined;
+    Response: PleasanterPageData<T>;
 }
-
-interface DataOfGetRequest {
-    View: ViewItems;
-    TableType?: "Normal" | "History" | "NormalAndHistory";
+type GetResponseData = PleasanterPage<RecordDataItems>;
+type KeyValuesResponseData = PleasanterPage<Record<string, unknown>>;
+interface DataOfGetRequest extends PleasanterApiData {
+    View?: ViewItems | undefined;
+    TableType?: "Normal" | "History" | "NormalAndHistory" | undefined;
 }
-
-// #endregion
-
-// #region Item系
-// #region CreateRequest関係の定義
-
-/**
- * @abstract apiCreate関数で使用する関数引数定義
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CreateRequestArgument extends
-    AbstractRequestInterfaceWithData<
-        OperationResponseJSON,
-        RecordDataItems
-    >
-{}
-
-// #endregion
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UpdateRequest extends AbstractRequestInterfaceWithData<OperationResponseJSON, RecordDataItems> {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeleteRequestArgument extends AbstractRequestInterface<OperationResponseJSON> {}
-
-// #endregion
-
-// #region Site系
-
-// #region GetSite系
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface GetSiteRequest extends AbstractRequestInterface<SiteResponseData> {}
-
+type StandardGetData = Omit<DataOfGetRequest, "View"> & {
+    View?: (Omit<ViewItems, "ApiDataType"> & { ApiDataType?: 0 | "Default" | undefined }) | undefined;
+};
+type KeyValuesGetData = Omit<DataOfGetRequest, "View"> & {
+    View: Omit<ViewItems, "ApiDataType"> & { ApiDataType: 1 | "KeyValues" };
+};
+type StandardGetRequest = AbstractRequestInterfaceWithData<GetResponseData, StandardGetData>;
+type KeyValuesGetRequest = PleasanterWriteRequest<KeyValuesResponseData, KeyValuesGetData>;
+type GetRequest = AbstractRequestInterfaceWithData<GetResponseData | KeyValuesResponseData, DataOfGetRequest>;
+type CreateRequestArgument = PleasanterWriteRequest<OperationResponseJSON, RecordWriteData>;
+type UpdateRequest = PleasanterWriteRequest<OperationResponseJSON, RecordWriteData>;
+type DeleteRequestArgument = AbstractRequestInterfaceWithData<OperationResponseJSON, PleasanterApiData>;
+type UpsertRequest = PleasanterWriteRequest<OperationResponseJSON, RecordWriteData & { Keys: string[] }>;
+interface BulkDeleteData extends PleasanterApiData {
+    View?: ViewItems | undefined;
+    Selected?: number[] | undefined;
+    /** trueの場合、Selectedは除外ID。 */
+    All?: boolean | undefined;
+    GridCheck?: boolean | undefined;
+    PhysicalDelete?: boolean | undefined;
+}
+type BulkDeleteRequest = PleasanterWriteRequest<OperationResponseJSON, BulkDeleteData>;
+type GetSiteRequest = AbstractRequestInterfaceWithData<SiteResponseData, PleasanterApiData>;
 interface SiteResponseData {
     StatusCode: number;
-    Response: SiteResponse | undefined;
+    Response: SiteResponse;
 }
-
 interface SiteResponse {
-    Data: SiteData | undefined;
+    Data: SiteData;
 }
-
-/**
- * @abstract Site関係のスクリプトで使用するデータ形式
- * 公式に以下注釈があるとおり、最新のデータ形式でない可能性があります。
- * [注釈]
- * ※サイト情報データは、サイトパッケージをエクスポートした際の"Site”パラメータと同等の値を設定する必要があります。
- * 「$p.apiGetSite」でサイト情報を取得したのち、
- * 任意の項目を変更してリクエストデータを作成するような処理を想定します。
- */
-interface SiteData {
-    TenantId?: number;
-    SiteId?: number;
+type DeleteSiteRequest = AbstractRequestInterfaceWithData<OperationResponseJSON, PleasanterApiData>;
+type UpdateSiteRequest = PleasanterWriteRequest<OperationResponseJSON, SiteData & PleasanterApiData>;
+type MoveSiteRequest = PleasanterWriteRequest<OperationResponseJSON, PleasanterApiData & { ParentId: number }>;
+type ClosestSiteRequest = PleasanterWriteRequest<ClosestSiteResponse, PleasanterApiData & { FindSiteNames: string[] }>;
+interface ClosestSiteResponse {
+    StatusCode: number;
+    SiteId: number;
+    Data: Array<{ SiteName: string; SiteId: number }>;
+}
+interface SiteData extends PleasanterHashes, PleasanterLegacyColumns {
+    TenantId?: number | undefined;
+    SiteId?: number | undefined;
     UpdatedTime?: string | undefined;
-    Ver?: number;
+    Ver?: number | undefined;
     Title?: string | undefined;
     Body?: string | undefined;
     SiteName?: string | undefined;
@@ -824,15 +610,17 @@ interface SiteData {
     GanttGuide?: string | undefined;
     BurnDownGuide?: string | undefined;
     TimeSeriesGuide?: string | undefined;
+    AnalyGuide?: string | undefined;
     KambanGuide?: string | undefined;
     ImageLibGuide?: string | undefined;
     ReferenceType?: string | undefined;
     ParentId?: number | undefined;
     InheritPermission?: number | undefined;
-    Permissions?: any[] | undefined;
+    Permissions?: string[] | undefined;
     SiteSettings?: SiteSettings | undefined;
     Publish?: boolean | undefined;
     DisableCrossSearch?: boolean | undefined;
+    EnableSsCache?: boolean | undefined;
     LockedTime?: string | undefined;
     LockedUser?: number | undefined;
     ApiCountDate?: string | undefined;
@@ -841,62 +629,51 @@ interface SiteData {
     Creator?: number | undefined;
     Updator?: number | undefined;
     CreatedTime?: string | undefined;
-    ApiVersion?: number | undefined;
-    ClassHash?: ClassHash | undefined;
-    NumHash?: NumHash | undefined;
-    DateHash?: DateHash | undefined;
-    DescriptionHash?: DescriptionHash | undefined;
-    CheckHash?: CheckHash | undefined;
-    AttachmentsHash?: AttachmentsHash | undefined;
+    ItemTitle?: string | undefined;
+    DisableSiteCreatorPermission?: boolean | undefined;
 }
 
 interface SiteSettings {
-    Version: number | undefined;
-    ReferenceType: string | undefined;
-    EditorColumnHash: EditorColumnHash | undefined;
-    Columns: Column[] | undefined;
-    Scripts: Script[] | undefined;
-    NoDisplayIfReadOnly: boolean | undefined;
+    Version?: number | undefined;
+    ReferenceType?: string | undefined;
+    EditorColumnHash?: EditorColumnHash | undefined;
+    GridColumns?: string[] | undefined;
+    Columns?: Column[] | undefined;
+    Scripts?: Script[] | undefined;
+    NoDisplayIfReadOnly?: boolean | undefined;
 }
-
 interface EditorColumnHash {
-    General: string[] | undefined;
+    [tabName: string]: string[] | undefined;
 }
-
 interface Column {
-    ColumnName: string | undefined;
+    ColumnName?: string | undefined;
     Description?: string | undefined;
     ChoicesText?: string | undefined;
     EditorFormat?: string | undefined;
     LabelText?: string | undefined;
     NoWrap?: boolean | undefined;
 }
-
 interface Script {
-    Title: string | undefined;
-    All: boolean | undefined;
-    Body: string | undefined;
-    Id: number | undefined;
+    Id?: number | undefined;
+    Title?: string | undefined;
+    Body?: string | undefined;
+    All?: boolean | undefined;
+    New?: boolean | undefined;
+    Edit?: boolean | undefined;
+    Index?: boolean | undefined;
+    Calendar?: boolean | undefined;
+    Crosstab?: boolean | undefined;
+    Gantt?: boolean | undefined;
+    BurnDown?: boolean | undefined;
+    TimeSeries?: boolean | undefined;
+    Analy?: boolean | undefined;
+    Kamban?: boolean | undefined;
+    ImageLib?: boolean | undefined;
+    Disabled?: boolean | undefined;
+    DraftOutputMode?: number | undefined;
+    DraftKey?: string | undefined;
 }
-
-// #endregion
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeleteSiteRequest extends AbstractRequestInterface<void> {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UpdateSiteRequest extends AbstractRequestInterfaceWithData<OperationResponseJSON, SiteData> {}
-
-// #endregion
-
-// #region Users系
-
-// #region UserGet系
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UsersGetRequest extends AbstractRequestInterface<GetResponseUserData> {}
-
-interface UserResponseData {
+interface UserResponseData extends PleasanterHashes, PleasanterLegacyColumns {
     TenantId?: number | undefined;
     UserId?: number | undefined;
     Ver?: number | undefined;
@@ -904,13 +681,17 @@ interface UserResponseData {
     GlobalId?: string | undefined;
     Name?: string | undefined;
     UserCode?: string | undefined;
+    LastName?: string | undefined;
+    FirstName?: string | undefined;
     Birthday?: string | undefined;
     Gender?: string | undefined;
     Language?: string | undefined;
     TimeZone?: string | undefined;
     DeptCode?: string | undefined;
     DeptId?: number | undefined;
+    Manager?: number | undefined;
     Theme?: string | undefined;
+    FirstAndLastNameOrder?: number | undefined;
     Body?: string | undefined;
     LastLoginTime?: string | undefined;
     PasswordExpirationTime?: string | undefined;
@@ -918,117 +699,140 @@ interface UserResponseData {
     NumberOfLogins?: number | undefined;
     NumberOfDenial?: number | undefined;
     TenantManager?: boolean | undefined;
+    ServiceManager?: boolean | undefined;
+    AllowCreationAtTopSite?: boolean | undefined;
+    AllowGroupAdministration?: boolean | undefined;
+    AllowGroupCreation?: boolean | undefined;
+    AllowApi?: boolean | undefined;
+    AllowMovingFromTopSite?: boolean | undefined;
+    EnableSecondaryAuthentication?: boolean | undefined;
+    DisableSecondaryAuthentication?: boolean | undefined;
     Disabled?: boolean | undefined;
     Lockout?: boolean | undefined;
     LockoutCounter?: number | undefined;
+    Developer?: boolean | undefined;
     UserSettings?: string | undefined;
+    PasswordHistries?: string | undefined;
     SecondaryAuthenticationCode?: string | undefined;
     SecondaryAuthenticationCodeExpirationTime?: string | undefined;
     LdapSearchRoot?: string | undefined;
     SynchronizedTime?: string | undefined;
+    SecretKey?: string | undefined;
+    EnableSecretKey?: boolean | undefined;
+    LoginExpirationLimit?: string | undefined;
+    LoginExpirationPeriod?: number | undefined;
+    ScimId?: string | undefined;
+    ScimExternalId?: string | undefined;
+    ScimSync?: boolean | undefined;
+    UiType?: string | undefined;
+    UiColorScheme?: string | undefined;
+    UiMainColor?: string | undefined;
+    UiSubColor?: string | undefined;
+    UiBackgroundColor?: string | undefined;
     Comments?: string | undefined;
     Creator?: number | undefined;
     Updator?: number | undefined;
     CreatedTime?: string | undefined;
     UpdatedTime?: string | undefined;
-    ApiVersion?: number | undefined;
-
-    ClassHash?: ClassHash | undefined;
-    NumHash?: NumHash | undefined;
-    DateHash?: DateHash | undefined;
-    DescriptionHash?: DescriptionHash | undefined;
-    CheckHash?: CheckHash | undefined;
+    MailAddresses?: string[] | undefined;
 }
-
-interface GetResponseUserData {
-    StatusCode: number;
-    Response: {
-        Offset: number;
-        PageSize: number;
-        TotalCount: number;
-        Data: UserResponseData[];
-    };
+interface UserCreateData extends UserResponseData, PleasanterApiData {
+    Password?: string | undefined;
 }
-
-// #endregion
-
-// #region UsersUpdate系
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UsersUpdateRequest extends AbstractRequestInterfaceWithData<OperationResponseJSON, UserResponseData> {}
-
-// #endregion
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UsersDeleteRequest extends AbstractRequestInterface<OperationResponseJSON> {}
-
-// #endregion
-
-// #region Groups系
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface GetGroupsRequest extends AbstractRequestInterfaceWithData<GroupsResponse, ViewItems> {}
-
-interface GroupsResponse {
-    StatusCode: number;
-    Response: GroupsResponseData;
+type UserUpdateData = UserResponseData & PleasanterApiData;
+interface DeptData extends PleasanterHashes, PleasanterLegacyColumns {
+    TenantId?: number | undefined;
+    DeptId?: number | undefined;
+    Ver?: number | undefined;
+    DeptCode?: string | undefined;
+    DeptName?: string | undefined;
+    Body?: string | undefined;
+    Disabled?: boolean | undefined;
+    Comments?: string | undefined;
+    Creator?: number | undefined;
+    Updator?: number | undefined;
+    CreatedTime?: string | undefined;
+    UpdatedTime?: string | undefined;
 }
-
-interface GroupsResponseData {
-    Offset: number;
-    PageSize: number;
-    TotalCount: number;
-    Data: GroupsData[];
+interface GroupsData extends PleasanterHashes, PleasanterLegacyColumns {
+    TenantId?: number | undefined;
+    GroupId?: number | undefined;
+    Ver?: number | undefined;
+    GroupName?: string | undefined;
+    Body?: string | undefined;
+    Disabled?: boolean | undefined;
+    LdapSync?: boolean | undefined;
+    LdapGuid?: string | undefined;
+    LdapSearchRoot?: string | undefined;
+    SynchronizedTime?: string | undefined;
+    ScimId?: string | undefined;
+    ScimExternalId?: string | undefined;
+    ScimSync?: boolean | undefined;
+    Comments?: string | undefined;
+    Creator?: number | undefined;
+    Updator?: number | undefined;
+    CreatedTime?: string | undefined;
+    UpdatedTime?: string | undefined;
+    GroupMembers?: string[] | undefined;
+    GroupChildren?: string[] | undefined;
 }
-
-interface GroupsData {
-    TenantId: number | undefined;
-    GroupId: number | undefined;
-    Ver: number | undefined;
-    GroupName: string | undefined;
-    Body: string | undefined;
-    Disabled: boolean | undefined;
-    Comments: string | undefined;
-    Creator: number | undefined;
-    Updator: number | undefined;
-    CreatedTime: string | undefined;
-    UpdatedTime: string | undefined;
-    GroupMembers: string[] | undefined;
-    ApiVersion: number | undefined;
-    ClassHash: ClassHash | undefined;
-    NumHash: NumHash | undefined;
-    DateHash: DateHash | undefined;
-    DescriptionHash: DescriptionHash | undefined;
-    CheckHash: CheckHash | undefined;
-    AttachmentsHash: AttachmentsHash | undefined;
+type GetResponseUserData = PleasanterPage<UserResponseData>;
+type GetResponseDeptData = PleasanterPage<DeptData>;
+type GroupsResponse = PleasanterPage<GroupsData>;
+type GroupsResponseData = PleasanterPageData<GroupsData>;
+type UsersGetRequest = PleasanterListRequest<GetResponseUserData>;
+type UsersCreateRequest = PleasanterCreateRequest<UserCreateData>;
+type UsersUpdateRequest = PleasanterWriteRequest<OperationResponseJSON, UserUpdateData>;
+type UsersDeleteRequest = AbstractRequestInterface<OperationResponseJSON>;
+type DeptsGetRequest = PleasanterListRequest<GetResponseDeptData>;
+type DeptsCreateRequest = PleasanterCreateRequest<DeptData & PleasanterApiData>;
+type DeptsUpdateRequest = PleasanterWriteRequest<OperationResponseJSON, DeptData & PleasanterApiData>;
+type DeptsDeleteRequest = AbstractRequestInterface<OperationResponseJSON>;
+type GetGroupsRequest = PleasanterListRequest<GroupsResponse>;
+type CreateGroupsArgument = PleasanterCreateRequest<GroupsData & PleasanterApiData>;
+type UpdateGroupsRequest = PleasanterWriteRequest<OperationResponseJSON, GroupsData & PleasanterApiData>;
+type DeleteGroupsRequest = AbstractRequestInterface<OperationResponseJSON>;
+interface PleasanterMailData extends PleasanterApiData {
+    From?: string | undefined;
+    To?: string | undefined;
+    Cc?: string | undefined;
+    Bcc?: string | undefined;
+    Title?: string | undefined;
+    Body?: string | undefined;
+    Attachments?: AttachmentsData[] | undefined;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DeleteGroupsRequest extends AbstractRequestInterface<void> {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface UpdateGroupsRequest extends AbstractRequestInterfaceWithData<GroupsData> {}
-
-/**
- * @abstract apiGroupsCreate関数で使用する関数引数定義
- */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CreateGroupsArgument extends AbstractRequestInterfaceWithData<OperationResponseJSON, GroupsData> {}
-
-// #endregion
-
+/** 宛先は少なくとも1つ必要。空文字や権限はサーバーが検証する。 */
+type SendMailRequest = PleasanterMailData & ({ To: string } | { Cc: string } | { Bcc: string });
+type SendMailRequestArgument = PleasanterWriteRequest<OperationResponseJSON, SendMailRequest>;
+type PleasanterSearchType =
+    | "PartialMatch"
+    | "ExactMatch"
+    | "ForwardMatch"
+    | "PartialMatchMultiple"
+    | "ExactMatchMultiple"
+    | "ForwardMatchMultiple";
+interface PleasanterApiColumn {
+    KeyDisplayType?: 0 | 1 | "LabelText" | "ColumnName" | undefined;
+    ValueDisplayType?: 0 | 1 | 2 | "DisplayValue" | "Value" | "Text" | undefined;
+}
 interface ViewItems {
-    Incomplete: boolean | undefined;
-    Own: boolean | undefined;
-    NearCompletionTime: boolean | undefined;
-    Delay: boolean | undefined;
-    Overdue: boolean | undefined;
-    Search: string | undefined;
-
-    ColumnFilterHash: { [key: string]: string } | undefined;
-    ColumnSorterHash: { [key: string]: string } | undefined;
+    Incomplete?: boolean | undefined;
+    Own?: boolean | undefined;
+    NearCompletionTime?: boolean | undefined;
+    Delay?: boolean | undefined;
+    Overdue?: boolean | undefined;
+    Search?: string | undefined;
+    GridColumns?: string[] | undefined;
+    ColumnFilterHash?: Record<string, string> | undefined;
+    ColumnFilterExpressions?: Record<string, string> | undefined;
+    ColumnSorterHash?: Record<string, "asc" | "desc"> | undefined;
+    ColumnFilterSearchTypes?: Record<string, PleasanterSearchType> | undefined;
+    ColumnFilterNegatives?: string[] | undefined;
+    ApiDataType?: 0 | 1 | "Default" | "KeyValues" | undefined;
+    ApiColumnKeyDisplayType?: PleasanterApiColumn["KeyDisplayType"] | undefined;
+    ApiColumnValueDisplayType?: PleasanterApiColumn["ValueDisplayType"] | undefined;
+    ApiColumnHash?: Record<string, PleasanterApiColumn> | undefined;
+    MergeSessionViewFilters?: boolean | undefined;
+    MergeSessionViewSorters?: boolean | undefined;
 }
-
-// ---
-// global interface
 declare const $p: PleasanterApiInterface;
