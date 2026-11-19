@@ -349,3 +349,180 @@ $p.apiCreate({
         console.log(result.Id);
     },
 });
+
+// Directory KeyValues responses use lowercase outer keys, unlike record apiGet.
+
+$p.apiUsersGet({}).done(result => {
+    result.Response.Data[0].UserId; // $ExpectType number | undefined
+    // @ts-expect-error Standard responses use the uppercase Response property.
+    result.response;
+});
+$p.apiUsersGet({
+    data: { View: { ApiDataType: "Default" } },
+    done(result) {
+        result.Response.Data[0].UserId; // $ExpectType number | undefined
+    },
+});
+$p.apiUsersGet({
+    data: { View: { ApiDataType: "KeyValues", GridColumns: ["UserId"], ApiColumnKeyDisplayType: "ColumnName" } },
+    done(result) {
+        result.statusCode; // $ExpectType number
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+        result.response.Data[0].UserId; // $ExpectType unknown
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase Response.
+        result.Response;
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase StatusCode.
+        result.StatusCode;
+        // @ts-expect-error KeyValues fields need a type check before numeric operations.
+        result.response.Data[0].UserId.toFixed();
+    },
+});
+$p.apiUsersGet({ id: 1, data: { View: { ApiDataType: 1 } } }).done(result => {
+    result.response.Data; // $ExpectType Record<string, unknown>[]
+});
+
+const usersView: ViewItems = { ApiDataType: "KeyValues" };
+const usersRequest: UsersGetRequest = { data: { View: usersView } };
+$p.apiUsersGet(usersRequest).done(result => {
+    // @ts-expect-error The response format is not known without narrowing.
+    result.Response;
+    if ("Response" in result) {
+        result.Response.Data; // $ExpectType UserResponseData[]
+    } else {
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+    }
+});
+$p.apiUsersGet({
+    data: { View: usersView },
+    done(result) {
+        if ("response" in result) {
+            result.response.Data; // $ExpectType Record<string, unknown>[]
+        } else {
+            result.Response.Data[0].UserId; // $ExpectType number | undefined
+        }
+    },
+});
+const standardUsersRequest: StandardUsersGetRequest = { data: { View: { ApiDataType: 0 } } };
+$p.apiUsersGet(standardUsersRequest).done(result => {
+    result.Response.Data[0].UserId; // $ExpectType number | undefined
+});
+
+$p.apiDeptsGet({}).done(result => {
+    result.Response.Data[0].DeptId; // $ExpectType number | undefined
+    // @ts-expect-error Standard responses use the uppercase Response property.
+    result.response;
+});
+$p.apiDeptsGet({
+    data: { View: { ApiDataType: "Default" } },
+    done(result) {
+        result.Response.Data[0].DeptId; // $ExpectType number | undefined
+    },
+});
+$p.apiDeptsGet({
+    data: { View: { ApiDataType: "KeyValues", GridColumns: ["DeptId"], ApiColumnKeyDisplayType: "ColumnName" } },
+    done(result) {
+        result.statusCode; // $ExpectType number
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+        result.response.Data[0].DeptId; // $ExpectType unknown
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase Response.
+        result.Response;
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase StatusCode.
+        result.StatusCode;
+        // @ts-expect-error KeyValues fields need a type check before numeric operations.
+        result.response.Data[0].DeptId.toFixed();
+    },
+});
+$p.apiDeptsGet({ id: 1, data: { View: { ApiDataType: 1 } } }).done(result => {
+    result.response.Data; // $ExpectType Record<string, unknown>[]
+});
+
+const deptsView: ViewItems = { ApiDataType: "KeyValues" };
+const deptsRequest: DeptsGetRequest = { data: { View: deptsView } };
+$p.apiDeptsGet(deptsRequest).done(result => {
+    // @ts-expect-error The response format is not known without narrowing.
+    result.Response;
+    if ("Response" in result) {
+        result.Response.Data; // $ExpectType DeptData[]
+    } else {
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+    }
+});
+$p.apiDeptsGet({
+    data: { View: deptsView },
+    done(result) {
+        if ("response" in result) {
+            result.response.Data; // $ExpectType Record<string, unknown>[]
+        } else {
+            result.Response.Data[0].DeptId; // $ExpectType number | undefined
+        }
+    },
+});
+const standardDeptsRequest: StandardDeptsGetRequest = { data: { View: { ApiDataType: 0 } } };
+$p.apiDeptsGet(standardDeptsRequest).done(result => {
+    result.Response.Data[0].DeptId; // $ExpectType number | undefined
+});
+
+$p.apiGroupsGet({}).done(result => {
+    result.Response.Data[0].GroupId; // $ExpectType number | undefined
+    // @ts-expect-error Standard responses use the uppercase Response property.
+    result.response;
+});
+$p.apiGroupsGet({
+    data: { View: { ApiDataType: "Default" } },
+    done(result) {
+        result.Response.Data[0].GroupId; // $ExpectType number | undefined
+    },
+});
+$p.apiGroupsGet({
+    data: { View: { ApiDataType: "KeyValues", GridColumns: ["GroupId"], ApiColumnKeyDisplayType: "ColumnName" } },
+    done(result) {
+        result.statusCode; // $ExpectType number
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+        result.response.Data[0].GroupId; // $ExpectType unknown
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase Response.
+        result.Response;
+        // @ts-expect-error Directory KeyValues responses do not have an uppercase StatusCode.
+        result.StatusCode;
+        // @ts-expect-error KeyValues fields need a type check before numeric operations.
+        result.response.Data[0].GroupId.toFixed();
+    },
+});
+$p.apiGroupsGet({ id: 1, data: { View: { ApiDataType: 1 } } }).done(result => {
+    result.response.Data; // $ExpectType Record<string, unknown>[]
+});
+
+const groupsView: ViewItems = { ApiDataType: "KeyValues" };
+const groupsRequest: GetGroupsRequest = { data: { View: groupsView } };
+$p.apiGroupsGet(groupsRequest).done(result => {
+    // @ts-expect-error The response format is not known without narrowing.
+    result.Response;
+    if ("Response" in result) {
+        result.Response.Data; // $ExpectType GroupsData[]
+    } else {
+        result.response.Data; // $ExpectType Record<string, unknown>[]
+    }
+});
+$p.apiGroupsGet({
+    data: { View: groupsView },
+    done(result) {
+        if ("response" in result) {
+            result.response.Data; // $ExpectType Record<string, unknown>[]
+        } else {
+            result.Response.Data[0].GroupId; // $ExpectType number | undefined
+        }
+    },
+});
+const standardGroupsRequest: StandardGroupsGetRequest = { data: { View: { ApiDataType: 0 } } };
+$p.apiGroupsGet(standardGroupsRequest).done(result => {
+    result.Response.Data[0].GroupId; // $ExpectType number | undefined
+});
+
+const directoryKeyValuesRequest: KeyValuesListRequest = { data: { View: { ApiDataType: "KeyValues" } } };
+$p.apiUsersGet(directoryKeyValuesRequest);
+$p.apiDeptsGet(directoryKeyValuesRequest);
+$p.apiGroupsGet(directoryKeyValuesRequest);
+$p.apiGet({ id: 1, data: { View: { ApiDataType: "KeyValues" } } }).done(result => {
+    result.Response.Data; // $ExpectType Record<string, unknown>[]
+    // @ts-expect-error Record apiGet keeps the uppercase Response envelope.
+    result.response;
+});

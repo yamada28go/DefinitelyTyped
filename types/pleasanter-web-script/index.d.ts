@@ -250,7 +250,9 @@ interface PleasanterApiInterface {
      * $p.apiUsersGet
      * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-users-get/
      */
-    apiUsersGet(request: UsersGetRequest): JQuery.jqXHR<GetResponseUserData>;
+    apiUsersGet(request: KeyValuesListRequest): JQuery.jqXHR<DirectoryKeyValuesResponseData>;
+    apiUsersGet(request: StandardUsersGetRequest): JQuery.jqXHR<GetResponseUserData>;
+    apiUsersGet(request: UsersGetRequest): JQuery.jqXHR<GetResponseUserData | DirectoryKeyValuesResponseData>;
 
     /**
      * $p.apiUsersCreate
@@ -274,7 +276,9 @@ interface PleasanterApiInterface {
      * $p.apiDeptsGet
      * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-depts-get/
      */
-    apiDeptsGet(request: DeptsGetRequest): JQuery.jqXHR<GetResponseDeptData>;
+    apiDeptsGet(request: KeyValuesListRequest): JQuery.jqXHR<DirectoryKeyValuesResponseData>;
+    apiDeptsGet(request: StandardDeptsGetRequest): JQuery.jqXHR<GetResponseDeptData>;
+    apiDeptsGet(request: DeptsGetRequest): JQuery.jqXHR<GetResponseDeptData | DirectoryKeyValuesResponseData>;
 
     /**
      * 要求データはdataに指定する。
@@ -298,7 +302,9 @@ interface PleasanterApiInterface {
      * $p.apiGroupsGet
      * @see https://pleasanter.org/ja/manual/developers-guide/script/script-api/script-api-groups-get/
      */
-    apiGroupsGet(request: GetGroupsRequest): JQuery.jqXHR<GroupsResponse>;
+    apiGroupsGet(request: KeyValuesListRequest): JQuery.jqXHR<DirectoryKeyValuesResponseData>;
+    apiGroupsGet(request: StandardGroupsGetRequest): JQuery.jqXHR<GroupsResponse>;
+    apiGroupsGet(request: GetGroupsRequest): JQuery.jqXHR<GroupsResponse | DirectoryKeyValuesResponseData>;
 
     /**
      * $p.apiGroupsCreate
@@ -526,9 +532,9 @@ interface AbstractRequestInterfaceWithData<T, D = void> extends AbstractRequestI
     data?: D | undefined;
 }
 type PleasanterWriteRequest<T, D> = AbstractRequestInterface<T> & { data: D };
-type PleasanterListRequest<T> = PleasanterCallbacks<T> & {
+type PleasanterListRequest<T, D = DataOfGetRequest> = PleasanterCallbacks<T> & {
     id?: number | undefined;
-    data?: DataOfGetRequest | undefined;
+    data?: D | undefined;
 };
 type PleasanterCreateRequest<D> = PleasanterCallbacks<OperationResponseJSON> & { data: D };
 interface PleasanterPageData<T> {
@@ -545,6 +551,17 @@ interface PleasanterPage<T> {
 }
 type GetResponseData = PleasanterPage<RecordDataItems>;
 type KeyValuesResponseData = PleasanterPage<Record<string, unknown>>;
+/** ユーザー・組織・グループのKeyValues形式では、外側のキーが小文字になる。 */
+interface DirectoryKeyValuesResponseData {
+    statusCode: number;
+    response: PleasanterPageData<Record<string, unknown>>;
+}
+
+type KeyValuesListRequest = PleasanterCallbacks<DirectoryKeyValuesResponseData> & {
+    id?: number | undefined;
+    data: KeyValuesGetData;
+};
+
 interface DataOfGetRequest extends PleasanterApiData {
     View?: ViewItems | undefined;
     TableType?: "Normal" | "History" | "NormalAndHistory" | undefined;
@@ -774,15 +791,21 @@ type GetResponseUserData = PleasanterPage<UserResponseData>;
 type GetResponseDeptData = PleasanterPage<DeptData>;
 type GroupsResponse = PleasanterPage<GroupsData>;
 type GroupsResponseData = PleasanterPageData<GroupsData>;
-type UsersGetRequest = PleasanterListRequest<GetResponseUserData>;
+type StandardUsersGetRequest = PleasanterListRequest<GetResponseUserData, StandardGetData>;
+
+type UsersGetRequest = PleasanterListRequest<GetResponseUserData | DirectoryKeyValuesResponseData>;
 type UsersCreateRequest = PleasanterCreateRequest<UserCreateData>;
 type UsersUpdateRequest = PleasanterWriteRequest<OperationResponseJSON, UserUpdateData>;
 type UsersDeleteRequest = AbstractRequestInterface<OperationResponseJSON>;
-type DeptsGetRequest = PleasanterListRequest<GetResponseDeptData>;
+type StandardDeptsGetRequest = PleasanterListRequest<GetResponseDeptData, StandardGetData>;
+
+type DeptsGetRequest = PleasanterListRequest<GetResponseDeptData | DirectoryKeyValuesResponseData>;
 type DeptsCreateRequest = PleasanterCreateRequest<DeptData & PleasanterApiData>;
 type DeptsUpdateRequest = PleasanterWriteRequest<OperationResponseJSON, DeptData & PleasanterApiData>;
 type DeptsDeleteRequest = AbstractRequestInterface<OperationResponseJSON>;
-type GetGroupsRequest = PleasanterListRequest<GroupsResponse>;
+type StandardGroupsGetRequest = PleasanterListRequest<GroupsResponse, StandardGetData>;
+
+type GetGroupsRequest = PleasanterListRequest<GroupsResponse | DirectoryKeyValuesResponseData>;
 type CreateGroupsArgument = PleasanterCreateRequest<GroupsData & PleasanterApiData>;
 type UpdateGroupsRequest = PleasanterWriteRequest<OperationResponseJSON, GroupsData & PleasanterApiData>;
 type DeleteGroupsRequest = AbstractRequestInterface<OperationResponseJSON>;
