@@ -516,13 +516,7 @@ type FailDataType = JQuery.jqXHR<unknown>;
 interface PleasanterCallbacks<T> {
     done?: ((data: T, textStatus: JQuery.Ajax.SuccessTextStatus, xhr: JQuery.jqXHR<T>) => void) | undefined;
     fail?: ((xhr: FailDataType, textStatus: JQuery.Ajax.ErrorTextStatus, errorThrown: string) => void) | undefined;
-    always?:
-        | ((
-            ...args:
-                | [data: T, textStatus: JQuery.Ajax.SuccessTextStatus, xhr: JQuery.jqXHR<T>]
-                | [xhr: FailDataType, textStatus: JQuery.Ajax.ErrorTextStatus, errorThrown: string]
-        ) => void)
-        | undefined;
+    always?: JQuery.jqXHR.AlwaysCallback<T, FailDataType> | undefined;
     async?: boolean | undefined;
 }
 interface AbstractRequestInterface<T> extends PleasanterCallbacks<T> {

@@ -78,9 +78,11 @@ $p.apiGet({
         status; // $ExpectType ErrorTextStatus
         errorThrown; // $ExpectType string
     },
-    always(...args) {
-        if (args[1] === "success") {
-            args[0].Response.Data; // $ExpectType RecordDataItems[]
+    always(result, status, xhrOrError) {
+        status; // $ExpectType TextStatus
+        xhrOrError; // $ExpectType string | FailDataType
+        if ("Response" in result) {
+            result.Response.Data; // $ExpectType RecordDataItems[]
         }
     },
 });
@@ -312,3 +314,38 @@ $p.apiGet({ id: 1, data: { ApiVersion: 1.0 } }).done(result => {
 $p.apiUpdate({ id: 1, data: { ApiVersion: 1.0, Class001: "Legacy" } });
 // @ts-expect-error Images are objects with Base64 and metadata.
 $p.apiCreate({ id: 1, data: { ImageHash: { DescriptionA: "raw" } } });
+
+$p.apiCreate({
+    id: 1,
+    data: { Title: "Cleanup" },
+    always() {
+        $p.clearMessage();
+    },
+});
+$p.apiCreate({
+    id: 1,
+    data: { Title: "One argument" },
+    always(result: OperationResponseJSON | FailDataType) {
+        if ("Id" in result) {
+            result.Id; // $ExpectType number
+        } else {
+            result.status; // $ExpectType number
+        }
+    },
+});
+$p.apiCreate({
+    id: 1,
+    data: { Title: "Invalid failure-only handler" },
+    // @ts-expect-error An always handler must also accept the success response.
+    always(result: FailDataType) {
+        console.log(result.status);
+    },
+});
+$p.apiCreate({
+    id: 1,
+    data: { Title: "Invalid success-only handler" },
+    // @ts-expect-error An always handler must also accept a failed jqXHR.
+    always(result: OperationResponseJSON) {
+        console.log(result.Id);
+    },
+});
