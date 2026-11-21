@@ -54,6 +54,7 @@ $p.apiUrl(1, "upsert", "items"); // $ExpectType string
 $p.apiGet({ id: 1 }).done(response => {
     response.Response.Data; // $ExpectType RecordDataItems[]
     response.Response.Data[0].WorkValue; // $ExpectType number | undefined
+    response.Response.Data[0].NumHash?.NumA; // $ExpectType number | null | undefined
 });
 $p.apiGet({
     id: 1,
@@ -314,6 +315,7 @@ $p.apiUsersUpdate({ id: 1, data: { Password: "invalid" } });
 
 $p.apiGet({ id: 1, data: { ApiVersion: 1.0 } }).done(result => {
     result.Response.Data[0].Class001; // $ExpectType string | undefined
+    result.Response.Data[0].NumA; // $ExpectType number | undefined
 });
 $p.apiUpdate({ id: 1, data: { ApiVersion: 1.0, Class001: "Legacy" } });
 // @ts-expect-error Images are objects with Base64 and metadata.

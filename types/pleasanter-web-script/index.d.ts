@@ -418,6 +418,7 @@ type PleasanterLetter =
 type PleasanterDigit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
 type PleasanterColumnSuffix = PleasanterLetter | Exclude<`0${PleasanterDigit}${PleasanterDigit}`, "000"> | "100";
 type ClassHash = Partial<Record<`Class${PleasanterColumnSuffix}`, string>>;
+/** Json.NET preserves null dictionary entries for nullable numeric columns. */
 type NumHash = Partial<Record<`Num${PleasanterColumnSuffix}`, number | null>>;
 type DateHash = Partial<Record<`Date${PleasanterColumnSuffix}`, string>>;
 type DescriptionHash = Partial<Record<`Description${PleasanterColumnSuffix}`, string>>;
@@ -465,9 +466,10 @@ interface PleasanterApiData {
     Offset?: number | undefined;
     PageSize?: number | undefined;
 }
+/** For API versions below 1.1, the server omits null flat properties during JSON serialization. */
 type PleasanterLegacyColumns =
     & ClassHash
-    & NumHash
+    & Partial<Record<`Num${PleasanterColumnSuffix}`, number>>
     & DateHash
     & DescriptionHash
     & CheckHash
