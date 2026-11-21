@@ -503,7 +503,9 @@ interface PleasanterImageData {
     Extension?: string | undefined;
     Base64?: string | undefined;
 }
-interface RecordWriteData extends RecordDataItems, PleasanterApiData {
+interface RecordWriteData extends Omit<RecordDataItems, "WorkValue">, PleasanterApiData {
+    /** Json.NET accepts numeric strings such as "10" for the decimal WorkValue in write requests. */
+    WorkValue?: number | `${number}` | undefined;
     VerUp?: boolean | undefined;
     ProcessId?: number | undefined;
     ProcessIds?: number[] | undefined;

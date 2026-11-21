@@ -53,6 +53,7 @@ if (selected !== -1) {
 $p.apiUrl(1, "upsert", "items"); // $ExpectType string
 $p.apiGet({ id: 1 }).done(response => {
     response.Response.Data; // $ExpectType RecordDataItems[]
+    response.Response.Data[0].WorkValue; // $ExpectType number | undefined
 });
 $p.apiGet({
     id: 1,
@@ -130,6 +131,9 @@ $p.apiCreate({ id: 1, data: item }).done(result => {
     result.LimitRemaining; // $ExpectType number | undefined
 });
 $p.apiUpdate({ id: 2, data: { Status: 200, WorkValue: 2.5 } });
+$p.apiUpdate({ id: 2, data: { WorkValue: "10" } });
+// @ts-expect-error WorkValue strings must be numeric.
+$p.apiUpdate({ id: 2, data: { WorkValue: "ten" } });
 const keys: string[] = ["ClassA"];
 $p.apiUpsert({ id: 1, data: { Keys: keys, Title: "Upsert" } });
 $p.apiDelete({ id: 2, data: { ApiVersion: 1.1 } });
